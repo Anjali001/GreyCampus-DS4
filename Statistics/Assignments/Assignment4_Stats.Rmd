@@ -1,0 +1,161 @@
+---
+title: "Assignment 4"
+author: "Anjali Pal"
+date: "10 May 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# <B><U> Part 1 </B></U>
+Data- The World Values Survey is an ongoing worldwide survey that polls the world population about perceptions of life, work, family, politics, etc. The most recent phase of the survey that polled 77,882 people from 57 countries estimates that 36.2% of the world's population agrees with the statement "Men should have more right to a job than women." The survey also estimates that 13.8% of people have a university degree or higher and that 3.6% of people fit both criteria. 
+
+```{r}
+sample_size <- 77882
+#Assuming sample is perfect representative of population, we can say that 36.2% people support statement in sample too.
+#Let S_A represent people who support statement(agree) and S_R represent those who oppose (refuse) the statement.
+S_A <- round(0.362*sample_size)
+S_R <- sample_size - S_A #Assuming people either accept the statement or refuse it.No one can be who didn't have a opinion.
+#Let U represent people who went to university or have higher degree and No_U represent represent those who do not went to university or have higher degree
+U <- round(0.138*sample_size)
+No_U <- sample_size - U #Because people either went to university or not.Disjoint Case
+#Let combination of S_A and U be AU, S_R and U be RU , S_A and NU be ANU , S_R and NU be RNU
+AU <- round(0.036*sample_size)
+RU <- U - AU
+ANU <- S_A - AU
+RNU <- S_R - RU
+# Let's make a 2*2 matrix for better view
+final_matrix <- matrix(data=c(AU,RU,U,ANU,RNU,No_U,S_A,S_R,sample_size),nrow=3,ncol=3, byrow=TRUE,dimnames=list(c("University+","No University","Total"),c("Stat_Agree","Stat_Refuse","Total")))
+final_matrix
+```
+
+# Question 1
+Are agreeing with the statement "Men should have more right to a job than women" and having a university degree or higher disjoint events?
+```{r message=FALSE, warning=FALSE}
+#If events are disjoint, Their intersection is 0.
+#This means the intersection of Stat_Agree and University+ must be 0 i.e. P(A or B) = 0 
+print(final_matrix[1,1]/final_matrix[3,3])
+#Since, it is >0 , these are not disjoint events.
+```
+# Question 2
+Draw a Venn diagram summarizing the variables and their associated probabilities.
+```{r message=FALSE, warning=FALSE}
+library(VennDiagram)
+venn.plot <- draw.pairwise.venn(
+  area1 = 0.362,
+  area2 = 0.138,
+  cross.area=0.036,
+  category = c("Agree to Statement","University+"),
+  euler.d =TRUE,
+  scaled=TRUE,
+  fill = c("red","green"),
+  cex = 2,
+  cat.cex = 2,
+  cat.pos = c(285, 105),
+  cat.dist = 0.09,
+  cat.just = list(c(-1, -1), c(1, 1))
+);
+grid.draw(venn.plot);
+grid.newpage();
+```
+# Question 3 
+What is the probability that a randomly drawn person has a university degree or higher or agrees with the statement about men having more right to a job than women?
+```{r message=FALSE, warning=FALSE}
+probUA <- (final_matrix[1,3]+final_matrix[3,1]-final_matrix[1,1])/final_matrix[3,3]
+print(probUA)
+```
+# Question 4
+What percent of the world population do not have a university degree and disagree with the statement about men having more right to a job than women?
+```{r message=FALSE, warning=FALSE}
+probNR <- (final_matrix[2,2]/final_matrix[3,3])*100
+print(probNR)
+```
+# Question 5
+Does it appear that the event that someone agrees with the statement is independent of the event that they have a university degree or higher?
+```{r message=FALSE, warning=FALSE}
+#For independent P(A)*P(B) = P(A and B)
+P_A <- final_matrix[3,1]/final_matrix[3,3]
+P_B <- final_matrix[1,3]/final_matrix[3,3]
+P_AB <- final_matrix[1,1]/final_matrix[3,3]
+ifelse(P_A*P_B == P_AB,"Independent","They are not independent.")
+```
+# Question 6
+What is the probability that at least 1 in 5 randomly selected people to agree with the statement about men having more right to a job than women?
+```{r message=FALSE, warning=FALSE}
+#This means we need to calculate probability 1-P(no one in 5 people support the statement)
+#this is binomial distribution.
+# n=5, x=0
+Rprob <- 1-((final_matrix[3,2]/final_matrix[3,3])^5)
+Rprob
+```
+
+
+# <B><U> Part 2 </B></U>
+Data- As of 2009, Swaziland had the highest HIV prevalence in the world. 25.9% of this country's population is infected with HIV. The ELISA test is one of the first and most accurate tests for HIV. For those who carry HIV, the ELISA test is 99.7% accurate. For those who do not carry HIV, the test is 92.6% accurate. If an individual from Swaziland has tested positive, what is the probability that he carries HIV? Create a tree diagram to calculate the probability.
+```{r message=FALSE, warning=FALSE}
+Infected_P <- 25.9/100
+Not_Infected_P <- 1-Infected_P
+Infected_Positive_P <- 99.7/100
+Infected_Negative_P <- 1-Infected_Positive_P
+Not_Infected_Negative_P <- 92.6/100
+Not_Infected_Positive_P <- 1-Not_Infected_Negative_P
+library(openintro)
+treeDiag(main = c("Infected with HIV?","Tested Positive or Negative?"),p1 =c(Infected_P,Not_Infected_P),out1 = c("Yes", "No"),out2 = c("Test Positive", "Test Negative"),p2=list(c(Infected_Positive_P,Infected_Negative_P),c(Not_Infected_Positive_P,Not_Infected_Negative_P)))
+```
+
+# Question 1
+If an individual from Swaziland has tested positive, what is the probability that he carries HIV?
+```{r message=FALSE, warning=FALSE}
+#Bayes Theorem
+#Let E be population has HIV
+#Let A be population tested +ve for HIV and B be population tested -ve for HIV
+#P(E|A) = P(A|E)*P(E)/(P(A|E)*P(E)+P(A|E')*P(E'))
+print(0.2582/(0.2582+0.0548)) #From Tree Chart
+```
+# Question 2
+According to a 2013 Gallup poll, worldwide only 13% of employees are engaged at work (psychologically committed to their jobs and likely to be making positive contributions to their organizations). Among a random sample of 10 employees, what is the probability that 8 of them are engaged at work?
+```{r message=FALSE, warning=FALSE}
+#P(Engaged)=0.13
+#Binomial distribution as only two outcomes Success or Failure. n=10,r=8,p=0.13,q=0.87 We have to find P(X=8)
+dbinom(x=8,size=10,prob=0.13)
+```
+# Question 3
+Recent study: "Facebook users get more than they give"
+
+friend requests: 40% made, 63% received at least one
+likes: liked 14 times, had their content "liked" 20 times, on average
+messages: sent 9 messages, received 12, on average
+tags:12% tagged a friend in a photo, but 35% tagged other findings:
+25% considered power users
+average Facebook user has 245 friends
+P(70 or more power user friends) = ?
+
+```{r message=FALSE, warning=FALSE}
+power_f_prob<-0.25
+tot_n <- 245
+#We have to find distribution of friends
+#if n is > 30 , it follows normal distribution
+# We have to know average no. of power friends for mean and SD
+#distribution of friends is binomial as one can be or cannot be a power user. So only 2 outcomes.
+mean_f<- tot_n*power_f_prob
+sd_f <- mean_f*(1-power_f_prob)
+#P(Z>= 70-mean/s.d.)
+z=(70-mean_f)/sd_f
+prob2<- 1-pnorm(z,0,1) #Standard normal variate, P(Z<z) is pnorm
+prob2
+```
+
+If we don't use approximation,
+
+```{r message=FALSE, warning=FALSE}
+pbinom(q=70,size=245,prob=0.25,lower.tail=FALSE) + dbinom(70,245,0.25) #P(X<x)+P(X=x)
+```
+# Question 4
+According to a 2014 Gallup poll, 56% of uninsured Americans who plan to get health insurance say they will do so through a government health insurance exchange. What is the probability that in a random sample of 10 people exactly 6 plan to get health insurance through a government health insurance exchange?
+
+```{r message=FALSE, warning=FALSE}
+#p=0.56,n=10,x=6 . binomial distr
+dbinom(size=10,prob = 0.56,x=6)
+```
