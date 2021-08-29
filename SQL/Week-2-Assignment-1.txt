@@ -1,0 +1,46 @@
+CREATE TABLE product_groups (
+	group_id SERIAL UNIQUE,
+	group_name VARCHAR(255)
+);
+
+CREATE TABLE products (
+	product_id SERIAL,
+	product_name VARCHAR(255) UNIQUE NOT NULL,
+	price NUMERIC(11,2),
+	group_id INTEGER REFERENCES product_groups(group_id)
+);
+
+INSERT INTO product_groups(group_id,group_name)
+VALUES
+(1,'Smartphone'),
+(2,'Laptop'),
+(3,'Tablet');
+
+INSERT INTO products(product_name,price,group_id)
+VALUES
+('Microsoft Lumia',200.00,1),
+('HTC One',400,1),
+('Nexus',500.00,1),
+('iPhone',900,1),
+('HP Elite',1200,2),
+('Lenovo Thinkpad',700,2),
+('Sony VAIO',700,2),
+('Dell Vostro',800,2),
+('iPad',700,3),
+('Kindle Fire',150,3),
+('Samsung Galaxy Tab',200,3);
+
+SELECT * FROM product_groups;
+SELECT * FROM products;
+
+
+SELECT product_name,product_groups.group_name, AVG(price) OVER (PARTITION BY products.group_id) 
+FROM products
+INNER JOIN product_groups
+ON products.group_id = product_groups.group_id;
+
+
+SELECT product_name,price,product_groups.group_name, AVG(price) OVER (PARTITION BY products.group_id) 
+FROM products
+INNER JOIN product_groups
+ON products.group_id = product_groups.group_id;
