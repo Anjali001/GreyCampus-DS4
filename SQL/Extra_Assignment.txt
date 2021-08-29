@@ -1,0 +1,45 @@
+-- Creating Table Structure
+CREATE TABLE consumer_complaints (
+    date_received varchar,
+    product_name varchar,
+    sub_product varchar,
+    issue varchar,
+    sub_issue varchar,
+    consumer_complaint_narrative varchar,
+    company_public_response varchar,
+    company varchar,
+    state_name varchar,
+    zip_code varchar,
+    tags varchar,
+    consumer_consent_provided varchar,
+    submitted_via varchar,
+    date_sent varchar,
+    company_response_to_consumer varchar,
+    timely_response varchar,
+    consumer_disputed varchar,
+    complaint_id integer
+);
+
+-- Getting CSV file
+COPY consumer_complaints 
+FROM 'C:\Users\Public\ConsumerComplaints.csv' DELIMITER ',' CSV HEADER;
+
+-- Check the number of complaints that were received and sent on the same day.
+SELECT COUNT(*) FROM consumer_complaints
+WHERE date_received = date_sent;
+
+-- Extract the complaints received in the New York states.
+SELECT * FROM consumer_complaints
+WHERE state_name = 'NY';
+
+-- Extract the complaints received in  New York and California.
+SELECT * FROM consumer_complaints
+WHERE state_name IN ('NY','CA');
+
+-- Extract all rows with the word ‘Late’ in the issue column.
+SELECT * FROM consumer_complaints
+WHERE issue ILIKE '%Late%';
+
+-- Pull out all the rows with the word ‘Credit’ in their product column.
+SELECT * FROM consumer_complaints
+WHERE product_name ILIKE '%CREDIT%';
